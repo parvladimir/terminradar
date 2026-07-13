@@ -34,7 +34,7 @@ final class MigrationRunner
     {
         foreach ([
             'source_locks', 'provider_logs', 'notifications', 'watch_matches', 'watches', 'users', 'appointment_slots',
-            'appointment_sources', 'appointment_types', 'doctor_specialty', 'doctors', 'practices', 'cities',
+            'appointment_sources', 'appointment_types', 'doctor_specialty', 'practice_specialty', 'doctors', 'practices', 'cities',
             'federal_states', 'medical_specialties', 'migrations',
         ] as $table) {
             $this->pdo->exec("DROP TABLE IF EXISTS {$table}");

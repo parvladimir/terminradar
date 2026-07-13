@@ -4,7 +4,7 @@
         <h1><?= $e($t('home.title')) ?></h1>
         <p><?= $e($t('home.subtitle')) ?></p>
     </div>
-    <form class="search-panel" method="get" action="/">
+    <form class="search-panel" method="get" action="/practices">
         <label>
             <?= $e($t('home.specialty')) ?>
             <select name="specialty">

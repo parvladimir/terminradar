@@ -13,6 +13,8 @@ The current implementation starts with a Composer-compatible modular PHP archite
 & 'C:\wamp64\bin\php\php8.4.0\php.exe' -S 127.0.0.1:8000 -t public
 ```
 
+Tests use `storage/testing.sqlite` so they do not reset the local development database.
+
 Production should point Apache document root to `public/`.
 
 For WAMP virtual hosts, set:

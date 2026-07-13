@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+$_ENV['DB_CONNECTION'] = 'sqlite';
+$_ENV['DB_DATABASE'] = 'storage/testing.sqlite';
+
 $app = require dirname(__DIR__) . '/bootstrap/app.php';
 
 function ok(bool $condition, string $message): void
@@ -30,6 +33,13 @@ ok((bool) $source, 'DocVisit appointment source is seeded');
 
 $repo = new TerminRadar\Repositories\SpecialtyRepository($pdo);
 ok($repo->active('uk')[0]['name'] !== '', 'localized specialty repository works');
+ok($app->translator->get('home.title') !== 'home.title', 'app translation fallback works');
+
+$practiceRepo = new TerminRadar\Repositories\PracticeRepository($pdo);
+$marlPractices = $practiceRepo->search(['city' => 'Marl', 'specialty' => 'urologie'], 'de');
+ok(count($marlPractices) >= 1, 'practice catalog finds seeded Urologie Marl source');
+$practice = $practiceRepo->find((int) $marlPractices[0]['id'], 'de');
+ok($practice !== null && count($practice['sources']) >= 1, 'practice detail loads sources');
 
 $auth = new TerminRadar\Services\AuthService(new TerminRadar\Repositories\UserRepository($pdo));
 $user = $auth->register(['name' => 'Test User', 'email' => 'test@example.de', 'password' => 'VerySecret123!'], 'uk');

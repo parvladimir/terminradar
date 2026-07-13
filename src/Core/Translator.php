@@ -33,15 +33,31 @@ final class Translator
     {
         [$file, $path] = array_pad(explode('.', $key, 2), 2, '');
         $locale = $this->locale();
-        $catalog = $this->load($locale, $file);
+        $value = $this->resolve($this->load($locale, $file), $path);
+
+        if ($value === null) {
+            $value = $this->resolve($this->load($locale, 'app'), $key);
+        }
+
+        return is_scalar($value) ? (string) $value : $key;
+    }
+
+    /** @param array<string, mixed> $catalog */
+    private function resolve(array $catalog, string $path): mixed
+    {
+        if ($path === '') {
+            return null;
+        }
+
         $value = $catalog;
         foreach (explode('.', $path) as $segment) {
             if (!is_array($value) || !array_key_exists($segment, $value)) {
-                return $key;
+                return null;
             }
             $value = $value[$segment];
         }
-        return is_scalar($value) ? (string) $value : $key;
+
+        return $value;
     }
 
     /** @return array<string, mixed> */

@@ -42,4 +42,14 @@ return static function (PDO $pdo): void {
             'updated_at' => $now,
         ]);
     }
+
+    $specialtyId = $pdo->query("SELECT id FROM medical_specialties WHERE slug = 'urologie'")->fetchColumn();
+    if ($specialtyId) {
+        $exists = $pdo->prepare('SELECT practice_id FROM practice_specialty WHERE practice_id = :practice_id AND specialty_id = :specialty_id');
+        $exists->execute(['practice_id' => $practiceId, 'specialty_id' => $specialtyId]);
+        if (!$exists->fetchColumn()) {
+            $stmt = $pdo->prepare('INSERT INTO practice_specialty (practice_id, specialty_id) VALUES (:practice_id, :specialty_id)');
+            $stmt->execute(['practice_id' => $practiceId, 'specialty_id' => $specialtyId]);
+        }
+    }
 };

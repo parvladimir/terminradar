@@ -5,6 +5,7 @@ use TerminRadar\Controllers\AuthController;
 use TerminRadar\Controllers\DashboardController;
 use TerminRadar\Controllers\HomeController;
 use TerminRadar\Controllers\LocaleController;
+use TerminRadar\Controllers\PracticeController;
 
 return static function (TerminRadar\Core\Router $router): void {
     $router->get('/', [HomeController::class, 'index']);
@@ -23,7 +24,13 @@ return static function (TerminRadar\Core\Router $router): void {
     $router->post('/logout', [AuthController::class, 'logout']);
 
     $router->get('/dashboard', [DashboardController::class, 'index']);
+    $router->get('/practices', [PracticeController::class, 'index']);
+    $router->get('/practices/{id}', [PracticeController::class, 'show']);
+
     $router->get('/admin', [AdminController::class, 'dashboard']);
+    $router->get('/admin/practices', [AdminController::class, 'practices']);
+    $router->post('/admin/practices', [AdminController::class, 'storePractice']);
 
     $router->get('/api/v1/specialties', [HomeController::class, 'apiSpecialties']);
+    $router->get('/api/v1/practices', [PracticeController::class, 'apiIndex']);
 };
