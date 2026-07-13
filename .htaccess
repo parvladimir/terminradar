@@ -1,0 +1,13 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/index.php [L]
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+    RewriteRule ^(.*)$ public/index.php [L]
+</IfModule>
+
+<FilesMatch "^(\.env|composer\.(json|lock)|README\.md|ARCHITECTURE\.md|IMPLEMENTATION_PLAN\.md)$">
+    Require all denied
+</FilesMatch>

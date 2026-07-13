@@ -14,3 +14,15 @@ The current implementation starts with a Composer-compatible modular PHP archite
 ```
 
 Production should point Apache document root to `public/`.
+
+For WAMP virtual hosts, set:
+
+```apache
+DocumentRoot "C:/wamp64/www/terminradar/public"
+<Directory "C:/wamp64/www/terminradar/public">
+    AllowOverride All
+    Require local
+</Directory>
+```
+
+The repository root also contains a fallback `index.php` and `.htaccess` so a local host that temporarily points to the project root does not expose the source tree.
