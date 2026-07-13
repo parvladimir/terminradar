@@ -10,9 +10,18 @@
 <header class="topbar">
     <a class="brand" href="/">TerminRadar</a>
     <nav class="nav">
-        <a href="/dashboard"><?= $e($t('nav.dashboard')) ?></a>
-        <a href="/login"><?= $e($t('nav.login')) ?></a>
-        <a class="button small" href="/register"><?= $e($t('nav.register')) ?></a>
+        <a href="/practices"><?= $e($t('catalog.title')) ?></a>
+        <?php if (($currentUser ?? null) !== null): ?>
+            <a href="/dashboard"><?= $e($t('nav.dashboard')) ?></a>
+            <?php if (($currentUser['role'] ?? 'user') === 'admin'): ?><a href="/admin">Admin</a><?php endif; ?>
+            <form method="post" action="/logout" class="inline-form">
+                <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">
+                <button class="link-button" type="submit"><?= $e($t('nav.logout')) ?></button>
+            </form>
+        <?php else: ?>
+            <a href="/login"><?= $e($t('nav.login')) ?></a>
+            <a class="button small" href="/register"><?= $e($t('nav.register')) ?></a>
+        <?php endif; ?>
         <form method="post" action="/locale" class="locale-form">
             <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">
             <input type="hidden" name="redirect" value="<?= $e($_SERVER['REQUEST_URI'] ?? '/') ?>">

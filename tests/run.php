@@ -41,6 +41,26 @@ ok(count($marlPractices) >= 1, 'practice catalog finds seeded Urologie Marl sour
 $practice = $practiceRepo->find((int) $marlPractices[0]['id'], 'de');
 ok($practice !== null && count($practice['sources']) >= 1, 'practice detail loads sources');
 
+$fixture = file_get_contents(__DIR__ . '/fixtures/docvisit_slots.html');
+$adapter = new TerminRadar\Providers\DocVisitProviderAdapter();
+$rawSlots = $adapter->fetchAvailableSlots([
+    'id' => 999,
+    'provider' => 'docvisit',
+    'source_url' => 'https://example.invalid/docvisit',
+    'booking_url' => 'https://example.invalid/book',
+    'fixture_html' => $fixture,
+]);
+ok(count($rawSlots) === 2, 'DocVisit adapter parses fixture slots');
+$normalizedSlots = array_map(static fn (array $raw) => $adapter->normalizeSlot($raw), $rawSlots);
+$slotRepo = new TerminRadar\Repositories\AppointmentSlotRepository($pdo);
+$sourceId = (int) $pdo->query("SELECT id FROM appointment_sources WHERE provider = 'docvisit' LIMIT 1")->fetchColumn();
+$sync = $slotRepo->sync($sourceId, $normalizedSlots);
+ok($sync['new'] === 2, 'slot sync stores new slots');
+$sync = $slotRepo->sync($sourceId, []);
+ok($sync['disappeared'] === 0, 'first empty response does not mark slots disappeared');
+$sync = $slotRepo->sync($sourceId, []);
+ok($sync['disappeared'] === 2, 'second confirmed empty response marks disappeared slots');
+
 $auth = new TerminRadar\Services\AuthService(new TerminRadar\Repositories\UserRepository($pdo));
 $user = $auth->register(['name' => 'Test User', 'email' => 'test@example.de', 'password' => 'VerySecret123!'], 'uk');
 ok($user !== null, 'user registration creates account');

@@ -87,7 +87,13 @@ final class AdminController extends Controller
 
     private function adminRedirect(): Response
     {
-        return is_numeric($this->app->session->get('user_id')) ? Response::redirect('/dashboard') : Response::redirect('/login');
+        if (is_numeric($this->app->session->get('user_id'))) {
+            $this->app->session->flash('error', 'Admin access requires an administrator account. Please log out and sign in as admin@example.de.');
+            return Response::redirect('/dashboard');
+        }
+
+        $this->app->session->flash('error', 'Please sign in with an administrator account.');
+        return Response::redirect('/login');
     }
 
     /** @return list<string> */

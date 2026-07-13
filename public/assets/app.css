@@ -40,6 +40,18 @@ a { color: inherit; }
     background: #fff;
     min-width: 0;
 }
+.inline-form {
+    display: inline;
+}
+.link-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
 .button {
     border: 0;
     background: var(--brand);

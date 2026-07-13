@@ -7,6 +7,9 @@ namespace TerminRadar\Core;
 use TerminRadar\Controllers\Controller;
 use TerminRadar\Database\MigrationRunner;
 use TerminRadar\Database\SeederRunner;
+use TerminRadar\Providers\ProviderRegistry;
+use TerminRadar\Repositories\AppointmentSourceRepository;
+use TerminRadar\Services\AppointmentCheckService;
 
 final class Application
 {
@@ -43,10 +46,10 @@ final class Application
             'migrate' => (new MigrationRunner($this->database->pdo(), $this->basePath))->run(),
             'db:seed' => (new SeederRunner($this->database->pdo(), $this->basePath))->run(),
             'migrate:fresh' => (new MigrationRunner($this->database->pdo(), $this->basePath))->fresh(),
-            'schedule:run' => $this->line('Scheduler ready: due source selection will run in stage 3.'),
-            'appointments:check' => $this->line('Appointment source checks are wired in stage 3.'),
-            'appointments:check-source' => $this->line('Usage accepted: appointments:check-source {id}. Provider implementation follows in stage 3.'),
-            'appointments:discover-types' => $this->line('Usage accepted: appointments:discover-types {sourceId}. Provider implementation follows in stage 3.'),
+            'schedule:run' => $this->checkDueSources(),
+            'appointments:check' => $this->checkDueSources(),
+            'appointments:check-source' => $this->checkSource((int) ($argv[2] ?? 0)),
+            'appointments:discover-types' => $this->discoverTypes((int) ($argv[2] ?? 0)),
             'appointments:test-notifications' => $this->line('Usage accepted: appointments:test-notifications {userId}. Notification transports follow in stage 4.'),
             'appointments:cleanup' => $this->line('Cleanup command ready; retention policy follows in stage 3.'),
             default => $this->help(),
@@ -70,6 +73,43 @@ final class Application
     {
         echo "TerminRadar console\n";
         echo "Commands: migrate, migrate:fresh, db:seed, schedule:run, appointments:check, appointments:check-source, appointments:discover-types, appointments:test-notifications, appointments:cleanup\n";
+        return 0;
+    }
+
+    private function checkDueSources(): int
+    {
+        $result = (new AppointmentCheckService($this->database->pdo()))->checkDue();
+        echo json_encode($result, JSON_THROW_ON_ERROR) . PHP_EOL;
+        return $result['errors'] > 0 ? 1 : 0;
+    }
+
+    private function checkSource(int $sourceId): int
+    {
+        if ($sourceId <= 0) {
+            echo "Usage: appointments:check-source {id}\n";
+            return 1;
+        }
+
+        $result = (new AppointmentCheckService($this->database->pdo()))->checkSource($sourceId);
+        echo json_encode($result, JSON_THROW_ON_ERROR) . PHP_EOL;
+        return $result['errors'] > 0 ? 1 : 0;
+    }
+
+    private function discoverTypes(int $sourceId): int
+    {
+        if ($sourceId <= 0) {
+            echo "Usage: appointments:discover-types {sourceId}\n";
+            return 1;
+        }
+
+        $source = (new AppointmentSourceRepository($this->database->pdo()))->find($sourceId);
+        if ($source === null) {
+            echo "Source not found.\n";
+            return 1;
+        }
+
+        $adapter = (new ProviderRegistry())->forSource($source);
+        echo json_encode(['data' => $adapter->fetchAppointmentTypes($source)], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) . PHP_EOL;
         return 0;
     }
 }
