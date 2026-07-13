@@ -55,6 +55,7 @@ final class AppointmentCheckService
             $rawSlots = $adapter->fetchAvailableSlots($source);
             $normalized = array_map(static fn (array $raw) => $adapter->normalizeSlot($raw), $rawSlots);
             $sync = $slots->sync($sourceId, $normalized);
+            (new WatchMatchingService($this->pdo))->matchSource($sourceId);
             $sources->markSuccess($sourceId);
             $logs->create($sourceId, 'success', 200, count($normalized), (int) ((microtime(true) - $started) * 1000), null, hash('sha256', json_encode($rawSlots, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)));
 

@@ -7,6 +7,7 @@
             <p><?= $e($practice['description'] ?? '') ?></p>
         </div>
         <div class="detail-actions">
+            <a class="button secondary" href="/watches/create?practice_id=<?= $e($practice['id']) ?>"><?= $e($t('watch.track')) ?></a>
             <?php if (!empty($practice['booking_url'])): ?><a class="button" href="<?= $e($practice['booking_url']) ?>" rel="noopener" target="_blank"><?= $e($t('catalog.booking')) ?></a><?php endif; ?>
             <?php if (!empty($practice['website_url'])): ?><a class="button secondary" href="<?= $e($practice['website_url']) ?>" rel="noopener" target="_blank"><?= $e($t('catalog.website')) ?></a><?php endif; ?>
         </div>
@@ -35,7 +36,12 @@
         <section>
             <h2><?= $e($t('catalog.slots')) ?></h2>
             <?php if ($practice['slots'] === []): ?><p class="muted-text"><?= $e($t('catalog.no_slots')) ?></p><?php endif; ?>
-            <?php foreach ($practice['slots'] as $slot): ?><p><?= $e($slot['starts_at']) ?> · <a href="<?= $e($slot['booking_url']) ?>"><?= $e($t('catalog.booking')) ?></a></p><?php endforeach; ?>
+            <?php foreach ($practice['slots'] as $slot): ?>
+                <div class="slot-row">
+                    <span><?= $e($slot['starts_at']) ?></span>
+                    <a class="button tiny" href="/slots/<?= $e($slot['id']) ?>/book"><?= $e($t('catalog.booking')) ?></a>
+                </div>
+            <?php endforeach; ?>
         </section>
     </div>
 </section>

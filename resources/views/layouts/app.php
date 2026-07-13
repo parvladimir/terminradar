@@ -20,7 +20,7 @@
             </form>
         <?php else: ?>
             <a href="/login"><?= $e($t('nav.login')) ?></a>
-            <a class="button small" href="/register"><?= $e($t('nav.register')) ?></a>
+            <a class="nav-cta" href="/register"><?= $e($t('nav.register')) ?></a>
         <?php endif; ?>
         <form method="post" action="/locale" class="locale-form">
             <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">

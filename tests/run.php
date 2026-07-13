@@ -67,4 +67,23 @@ ok($user !== null, 'user registration creates account');
 ok($auth->attempt('test@example.de', 'VerySecret123!') !== null, 'login verifies password');
 ok($auth->attempt('test@example.de', 'wrong-password') === null, 'login rejects bad password');
 
+$slotRepo->sync($sourceId, $normalizedSlots);
+$watchId = (new TerminRadar\Repositories\WatchRepository($pdo))->create((int) $user['id'], [
+    'name' => 'Test watch',
+    'practice_id' => 1,
+    'earliest_date' => '2026-07-01',
+    'latest_date' => '2026-12-31',
+    'time_from' => '08:00',
+    'time_to' => '16:00',
+    'frequency_minutes' => 15,
+    'notification_email' => '1',
+]);
+ok($watchId > 0, 'watch repository creates watch');
+$matched = (new TerminRadar\Services\WatchMatchingService($pdo))->matchSource($sourceId);
+ok($matched >= 1, 'watch matching creates matches');
+$notifications = (int) $pdo->query('SELECT COUNT(*) FROM notifications')->fetchColumn();
+ok($notifications >= 1, 'watch matching creates notification records');
+$matchedAgain = (new TerminRadar\Services\WatchMatchingService($pdo))->matchSource($sourceId);
+ok($matchedAgain === 0, 'watch matching does not duplicate existing matches');
+
 echo "All tests passed.\n";

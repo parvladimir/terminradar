@@ -7,6 +7,7 @@ namespace TerminRadar\Controllers;
 use TerminRadar\Core\Request;
 use TerminRadar\Core\Response;
 use TerminRadar\Repositories\UserRepository;
+use TerminRadar\Repositories\WatchRepository;
 
 final class DashboardController extends Controller
 {
@@ -18,6 +19,9 @@ final class DashboardController extends Controller
         }
 
         $user = (new UserRepository($this->app->database->pdo()))->find((int) $userId);
-        return $this->view('dashboard', ['user' => $user]);
+        return $this->view('dashboard', [
+            'user' => $user,
+            'watches' => (new WatchRepository($this->app->database->pdo()))->forUser((int) $userId),
+        ]);
     }
 }
