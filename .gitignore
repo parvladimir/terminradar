@@ -1,0 +1,12 @@
+/.env
+/storage/*.sqlite
+/storage/logs/*.log
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/node_modules
+/vendor/*
+!/vendor/autoload.php

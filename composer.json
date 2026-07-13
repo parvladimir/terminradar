@@ -1,0 +1,23 @@
+{
+  "name": "terminradar/app",
+  "description": "TerminRadar medical appointment monitoring web application for Germany.",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.2",
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "TerminRadar\\": "src/"
+    }
+  },
+  "scripts": {
+    "test": "php tests/run.php",
+    "migrate": "php bin/console migrate",
+    "seed": "php bin/console db:seed"
+  }
+}
