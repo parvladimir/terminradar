@@ -100,7 +100,7 @@ final class PracticeRepository
         $stmt->execute(['practice_id' => $id]);
         $practice['sources'] = $stmt->fetchAll();
 
-        $stmt = $this->pdo->prepare("SELECT s.* FROM appointment_slots s INNER JOIN appointment_sources src ON src.id = s.appointment_source_id WHERE src.practice_id = :practice_id AND s.status = 'available' ORDER BY s.starts_at LIMIT 10");
+        $stmt = $this->pdo->prepare("SELECT s.* FROM appointment_slots s INNER JOIN appointment_sources src ON src.id = s.appointment_source_id WHERE src.practice_id = :practice_id AND s.status = 'available' ORDER BY s.starts_at");
         $stmt->execute(['practice_id' => $id]);
         $practice['slots'] = $stmt->fetchAll();
 

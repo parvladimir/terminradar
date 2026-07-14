@@ -373,6 +373,80 @@ textarea {
     padding: .5rem 0;
     border-bottom: 1px solid var(--line);
 }
+.slots-section {
+    grid-column: 1 / -1;
+}
+.slots-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.slots-heading h2 {
+    margin-bottom: .35rem;
+}
+.slot-count {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: .35rem .7rem;
+    background: #ecfdf5;
+    color: #047857;
+    font-weight: 900;
+    white-space: nowrap;
+}
+.slot-days {
+    display: grid;
+    gap: 1rem;
+}
+.slot-day {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fbfdfc;
+    padding: 1rem;
+}
+.slot-day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .8rem;
+}
+.slot-day-head h3 {
+    margin: 0;
+    font-size: 1.15rem;
+}
+.slot-day-head span {
+    color: var(--muted);
+    font-weight: 800;
+}
+.slot-time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: .55rem;
+}
+.slot-time {
+    display: grid;
+    place-items: center;
+    gap: .1rem;
+    min-height: 54px;
+    border-radius: 8px;
+    background: var(--brand);
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 8px 18px rgba(15, 118, 110, .16);
+}
+.slot-time:hover {
+    filter: brightness(.96);
+    transform: translateY(-1px);
+}
+.slot-time strong {
+    font-size: 1.05rem;
+}
+.slot-time span {
+    font-size: .78rem;
+    opacity: .86;
+}
 .chips {
     display: flex;
     gap: .5rem;
@@ -401,6 +475,6 @@ textarea {
     .hero { grid-template-columns: 1fr; }
     .steps, .metrics, .tool-grid, .filters, .form-grid, .detail-grid, .channel-grid { grid-template-columns: 1fr; }
     .topbar { align-items: flex-start; flex-direction: column; }
-    .practice-card, .detail-header, .slot-row, .watch-card, .event-row, .info-strip { flex-direction: column; align-items: flex-start; }
+    .practice-card, .detail-header, .slot-row, .watch-card, .event-row, .info-strip, .slots-heading, .slot-day-head { flex-direction: column; align-items: flex-start; }
     .slot-summary div { grid-template-columns: 1fr; gap: .25rem; }
 }

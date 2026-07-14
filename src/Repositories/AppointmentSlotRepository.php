@@ -46,10 +46,13 @@ final class AppointmentSlotRepository
                 continue;
             }
 
-            $stmt = $this->pdo->prepare("UPDATE appointment_slots SET last_seen_at = :now, status = 'available', disappeared_at = NULL, absent_confirmations = 0, booking_url = :booking_url, source_label = :source_label, raw_payload = :raw_payload, updated_at = :now WHERE id = :id");
+            $stmt = $this->pdo->prepare("UPDATE appointment_slots SET ends_at = :ends_at, booking_url = :booking_url, external_slot_id = :external_slot_id, last_seen_at = :now, status = 'available', raw_hash = :raw_hash, disappeared_at = NULL, absent_confirmations = 0, source_label = :source_label, raw_payload = :raw_payload, updated_at = :now WHERE id = :id");
             $stmt->execute([
                 'id' => $existing['id'],
+                'ends_at' => $slot->endsAt,
                 'booking_url' => $slot->bookingUrl,
+                'external_slot_id' => $slot->externalSlotId,
+                'raw_hash' => $slot->rawHash,
                 'source_label' => $slot->sourceLabel,
                 'raw_payload' => $slot->rawPayload !== null ? json_encode($slot->rawPayload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : null,
                 'now' => $now,
@@ -76,10 +79,15 @@ final class AppointmentSlotRepository
             $stmt = $this->pdo->prepare('SELECT * FROM appointment_slots WHERE appointment_source_id = :source_id AND external_slot_id = :external_slot_id LIMIT 1');
             $stmt->execute(['source_id' => $sourceId, 'external_slot_id' => $slot->externalSlotId]);
             $row = $stmt->fetch();
-            return $row ?: null;
+            if ($row) {
+                return $row;
+            }
         }
 
-        return null;
+        $stmt = $this->pdo->prepare('SELECT * FROM appointment_slots WHERE appointment_source_id = :source_id AND starts_at = :starts_at LIMIT 1');
+        $stmt->execute(['source_id' => $sourceId, 'starts_at' => $slot->startsAt]);
+        $row = $stmt->fetch();
+        return $row ?: null;
     }
 
     /** @param list<string> $seenHashes */

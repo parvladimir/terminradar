@@ -1,5 +1,28 @@
 <section class="page detail">
-    <a href="/practices" class="back-link">← <?= $e($t('catalog.back')) ?></a>
+    <?php
+    $slotGroups = [];
+    $weekdayNames = [
+        1 => 'Понедельник',
+        2 => 'Вторник',
+        3 => 'Среда',
+        4 => 'Четверг',
+        5 => 'Пятница',
+        6 => 'Суббота',
+        7 => 'Воскресенье',
+    ];
+    foreach ($practice['slots'] as $slot) {
+        $date = new DateTimeImmutable((string) $slot['starts_at']);
+        $key = $date->format('Y-m-d');
+        if (!isset($slotGroups[$key])) {
+            $slotGroups[$key] = [
+                'label' => $weekdayNames[(int) $date->format('N')] . ', ' . $date->format('d.m.Y'),
+                'slots' => [],
+            ];
+        }
+        $slotGroups[$key]['slots'][] = $slot + ['time_label' => $date->format('H:i')];
+    }
+    ?>
+    <a href="/practices" class="back-link">&larr; <?= $e($t('catalog.back')) ?></a>
     <div class="detail-header">
         <div>
             <p class="eyebrow"><?= $e($practice['city'] ?? '') ?> <?= $e($practice['postal_code'] ?? '') ?></p>
@@ -51,16 +74,33 @@
                 </article>
             <?php endforeach; ?>
         </section>
-        <section>
-            <h2><?= $e($t('catalog.slots')) ?></h2>
-            <p class="muted-text"><?= $e($t('catalog.source_note')) ?></p>
-            <?php if ($practice['slots'] === []): ?><p class="muted-text"><?= $e($t('catalog.no_slots')) ?></p><?php endif; ?>
-            <?php foreach ($practice['slots'] as $slot): ?>
-                <div class="slot-row">
-                    <span><?= $e($slot['starts_at']) ?></span>
-                    <a class="button tiny" href="/slots/<?= $e($slot['id']) ?>/book"><?= $e($t('catalog.booking')) ?></a>
+        <section class="slots-section">
+            <div class="slots-heading">
+                <div>
+                    <h2><?= $e($t('catalog.slots')) ?></h2>
+                    <p class="muted-text"><?= $e($t('catalog.source_note')) ?></p>
                 </div>
-            <?php endforeach; ?>
+                <span class="slot-count"><?= count($practice['slots']) ?> терминов</span>
+            </div>
+            <?php if ($practice['slots'] === []): ?><p class="muted-text"><?= $e($t('catalog.no_slots')) ?></p><?php endif; ?>
+            <div class="slot-days">
+                <?php foreach ($slotGroups as $group): ?>
+                    <article class="slot-day">
+                        <div class="slot-day-head">
+                            <h3><?= $e($group['label']) ?></h3>
+                            <span><?= count($group['slots']) ?> слотов</span>
+                        </div>
+                        <div class="slot-time-grid">
+                            <?php foreach ($group['slots'] as $slot): ?>
+                                <a class="slot-time" href="<?= $e($slot['booking_url'] ?: '/slots/' . $slot['id'] . '/book') ?>" target="_blank" rel="noopener" title="<?= $e($slot['source_label'] ?? '') ?>">
+                                    <strong><?= $e($slot['time_label']) ?></strong>
+                                    <span>DocVisit</span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
         </section>
     </div>
 </section>
