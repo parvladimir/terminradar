@@ -35,6 +35,7 @@
         </section>
         <section>
             <h2><?= $e($t('catalog.slots')) ?></h2>
+            <p class="muted-text"><?= $e($t('catalog.source_note')) ?></p>
             <?php if ($practice['slots'] === []): ?><p class="muted-text"><?= $e($t('catalog.no_slots')) ?></p><?php endif; ?>
             <?php foreach ($practice['slots'] as $slot): ?>
                 <div class="slot-row">

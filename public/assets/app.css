@@ -160,6 +160,49 @@ textarea {
     gap: .85rem;
     margin-top: 1.25rem;
 }
+.dashboard-section {
+    margin-top: 1.5rem;
+}
+.info-strip {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--brand);
+    border-radius: 8px;
+    background: #fff;
+    padding: .9rem 1rem;
+    margin-bottom: 1rem;
+}
+.channel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+.channel-grid article, .event-row {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+.channel-grid article {
+    display: grid;
+    gap: .65rem;
+    align-content: start;
+}
+.event-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: .65rem;
+}
+.event-row p {
+    margin: .25rem 0 0;
+}
+.error-text {
+    color: var(--danger);
+}
 .watch-card {
     display: flex;
     align-items: center;
@@ -314,8 +357,8 @@ textarea {
 
 @media (max-width: 820px) {
     .hero { grid-template-columns: 1fr; }
-    .steps, .metrics, .tool-grid, .filters, .form-grid, .detail-grid { grid-template-columns: 1fr; }
+    .steps, .metrics, .tool-grid, .filters, .form-grid, .detail-grid, .channel-grid { grid-template-columns: 1fr; }
     .topbar { align-items: flex-start; flex-direction: column; }
-    .practice-card, .detail-header, .slot-row, .watch-card { flex-direction: column; align-items: flex-start; }
+    .practice-card, .detail-header, .slot-row, .watch-card, .event-row, .info-strip { flex-direction: column; align-items: flex-start; }
     .slot-summary div { grid-template-columns: 1fr; gap: .25rem; }
 }

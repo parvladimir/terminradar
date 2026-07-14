@@ -144,6 +144,56 @@ final class ApiController extends Controller
         return Response::json(['data' => $stmt->fetchAll()]);
     }
 
+    public function telegramLinkCode(Request $request): Response
+    {
+        $user = $this->apiUser($request);
+        if (!$user) {
+            return Response::json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $code = strtoupper(bin2hex(random_bytes(3)));
+        $stmt = $this->app->database->pdo()->prepare('UPDATE users SET telegram_link_code = :code, telegram_link_expires_at = :expires, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([
+            'id' => $user['id'],
+            'code' => $code,
+            'expires' => date('c', time() + 900),
+            'updated_at' => date('c'),
+        ]);
+
+        return Response::json(['data' => ['code' => $code, 'expires_at' => date('c', time() + 900)]]);
+    }
+
+    public function pushSubscribe(Request $request): Response
+    {
+        $user = $this->apiUser($request);
+        if (!$user) {
+            return Response::json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $subscription = $request->post !== [] ? $request->post : ['local_placeholder' => true];
+        $stmt = $this->app->database->pdo()->prepare('UPDATE users SET web_push_enabled = 1, web_push_subscription = :subscription, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([
+            'id' => $user['id'],
+            'subscription' => json_encode($subscription, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+            'updated_at' => date('c'),
+        ]);
+
+        return Response::json(['data' => ['web_push_enabled' => true]]);
+    }
+
+    public function pushUnsubscribe(Request $request): Response
+    {
+        $user = $this->apiUser($request);
+        if (!$user) {
+            return Response::json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $stmt = $this->app->database->pdo()->prepare('UPDATE users SET web_push_enabled = 0, web_push_subscription = NULL, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute(['id' => $user['id'], 'updated_at' => date('c')]);
+
+        return Response::json(['data' => ['web_push_enabled' => false]]);
+    }
+
     private function apiUser(Request $request): ?array
     {
         return (new ApiTokenRepository($this->app->database->pdo()))->userForToken($request->bearerToken());

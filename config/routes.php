@@ -6,6 +6,7 @@ use TerminRadar\Controllers\AuthController;
 use TerminRadar\Controllers\DashboardController;
 use TerminRadar\Controllers\HomeController;
 use TerminRadar\Controllers\LocaleController;
+use TerminRadar\Controllers\NotificationController;
 use TerminRadar\Controllers\PracticeController;
 use TerminRadar\Controllers\SlotController;
 use TerminRadar\Controllers\WatchController;
@@ -35,6 +36,9 @@ return static function (TerminRadar\Core\Router $router): void {
     $router->post('/watches/{id}/pause', [WatchController::class, 'pause']);
     $router->post('/watches/{id}/resume', [WatchController::class, 'resume']);
     $router->post('/watches/{id}/delete', [WatchController::class, 'delete']);
+    $router->post('/notifications/test/{channel}', [NotificationController::class, 'test']);
+    $router->post('/telegram/link-code', [NotificationController::class, 'telegramCode']);
+    $router->post('/push/enable-local', [NotificationController::class, 'enableWebPush']);
     $router->get('/api/v1/watches', [WatchController::class, 'apiIndex']);
 
     $router->get('/admin', [AdminController::class, 'dashboard']);
@@ -54,4 +58,7 @@ return static function (TerminRadar\Core\Router $router): void {
     $router->get('/api/v1/watches', [ApiController::class, 'watches']);
     $router->post('/api/v1/watches', [ApiController::class, 'createWatch']);
     $router->get('/api/v1/slots', [ApiController::class, 'slots']);
+    $router->post('/api/v1/telegram/link-code', [ApiController::class, 'telegramLinkCode']);
+    $router->post('/api/v1/push/subscribe', [ApiController::class, 'pushSubscribe']);
+    $router->delete('/api/v1/push/unsubscribe', [ApiController::class, 'pushUnsubscribe']);
 };

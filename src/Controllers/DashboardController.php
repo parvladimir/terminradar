@@ -6,6 +6,7 @@ namespace TerminRadar\Controllers;
 
 use TerminRadar\Core\Request;
 use TerminRadar\Core\Response;
+use TerminRadar\Repositories\NotificationRepository;
 use TerminRadar\Repositories\UserRepository;
 use TerminRadar\Repositories\WatchRepository;
 
@@ -19,9 +20,13 @@ final class DashboardController extends Controller
         }
 
         $user = (new UserRepository($this->app->database->pdo()))->find((int) $userId);
+        $notifications = new NotificationRepository($this->app->database->pdo());
+
         return $this->view('dashboard', [
             'user' => $user,
             'watches' => (new WatchRepository($this->app->database->pdo()))->forUser((int) $userId),
+            'matches' => $notifications->matchesForUser((int) $userId),
+            'notifications' => $notifications->forUser((int) $userId),
         ]);
     }
 }

@@ -58,8 +58,11 @@ final class Request
         if (isset($_SERVER['CONTENT_TYPE'])) {
             $headers['content-type'] = (string) $_SERVER['CONTENT_TYPE'];
         }
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            $headers['authorization'] = (string) $_SERVER['HTTP_AUTHORIZATION'];
+        foreach (['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'Authorization'] as $key) {
+            if (isset($_SERVER[$key])) {
+                $headers['authorization'] = (string) $_SERVER[$key];
+                break;
+            }
         }
         return $headers;
     }

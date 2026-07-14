@@ -24,6 +24,28 @@ Tests use `storage/testing.sqlite` so they do not reset the local development da
 
 `appointments:check` processes enabled sources that are due. `appointments:check-source 1` runs the seeded DocVisit source directly and stores normalized slots in `appointment_slots`.
 
+## How monitoring is visible locally
+
+1. Create a Watch from a Praxis page or `/watches/create`.
+2. Run:
+
+```powershell
+& 'C:\wamp64\bin\php\php8.4.0\php.exe' bin/console appointments:check-source 1
+```
+
+3. Open `/dashboard`.
+
+The dashboard shows:
+
+- active Watches;
+- notification channel status;
+- matches from `watch_matches`;
+- notification records from `notifications`.
+
+Telegram and Web Push need a transport connection before real external delivery. Until then, TerminRadar still creates in-app notification records so the matching result is visible.
+
+Current seeded appointments come from the public DocVisit calendar URL stored in `appointment_sources` for the test Praxis. They are fetched live by `appointments:check-source 1` and then stored in `appointment_slots`.
+
 Production should point Apache document root to `public/`.
 
 For WAMP virtual hosts, set:

@@ -6,6 +6,7 @@ namespace TerminRadar\Services;
 
 use DateTimeImmutable;
 use PDO;
+use TerminRadar\Repositories\NotificationRepository;
 use TerminRadar\Repositories\WatchRepository;
 
 final class WatchMatchingService
@@ -82,7 +83,7 @@ final class WatchMatchingService
         $stmt = $this->pdo->prepare("INSERT INTO watch_matches (watch_id, appointment_slot_id, matched_at, status, created_at, updated_at) VALUES (:watch_id, :slot_id, :matched_at, 'new', :created_at, :updated_at)");
         $stmt->execute(['watch_id' => $watch['id'], 'slot_id' => $slot['id'], 'matched_at' => $now, 'created_at' => $now, 'updated_at' => $now]);
 
-        $channels = [];
+        $channels = ['in_app'];
         if ((int) $watch['notification_email'] === 1) {
             $channels[] = 'email';
         }
@@ -92,23 +93,10 @@ final class WatchMatchingService
         if ((int) $watch['notification_web_push'] === 1 && (int) ($watch['web_push_enabled'] ?? 0) === 1) {
             $channels[] = 'web_push';
         }
-        if ($channels === []) {
-            $channels[] = 'in_app';
-        }
-
+        $notifications = new NotificationRepository($this->pdo);
         foreach ($channels as $channel) {
             $body = sprintf('Praxis: %s. Termin: %s. Buchung: /slots/%d/book', $slot['practice_name'], $slot['starts_at'], $slot['id']);
-            $stmt = $this->pdo->prepare("INSERT INTO notifications (user_id, watch_id, appointment_slot_id, channel, subject, body, status, created_at, updated_at) VALUES (:user_id, :watch_id, :slot_id, :channel, :subject, :body, 'pending', :created_at, :updated_at)");
-            $stmt->execute([
-                'user_id' => $watch['user_id'],
-                'watch_id' => $watch['id'],
-                'slot_id' => $slot['id'],
-                'channel' => $channel,
-                'subject' => 'TerminRadar: neuer passender Termin',
-                'body' => $body,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            $notifications->create((int) $watch['user_id'], (int) $watch['id'], (int) $slot['id'], $channel, 'TerminRadar: neuer passender Termin', $body);
         }
 
         return true;
