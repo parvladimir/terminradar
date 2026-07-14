@@ -1,6 +1,7 @@
 <?php
 
 use TerminRadar\Controllers\AdminController;
+use TerminRadar\Controllers\ApiController;
 use TerminRadar\Controllers\AuthController;
 use TerminRadar\Controllers\DashboardController;
 use TerminRadar\Controllers\HomeController;
@@ -40,6 +41,17 @@ return static function (TerminRadar\Core\Router $router): void {
     $router->get('/admin/practices', [AdminController::class, 'practices']);
     $router->post('/admin/practices', [AdminController::class, 'storePractice']);
 
-    $router->get('/api/v1/specialties', [HomeController::class, 'apiSpecialties']);
-    $router->get('/api/v1/practices', [PracticeController::class, 'apiIndex']);
+    $router->post('/api/v1/auth/register', [ApiController::class, 'register']);
+    $router->post('/api/v1/auth/login', [ApiController::class, 'login']);
+    $router->post('/api/v1/auth/logout', [ApiController::class, 'logout']);
+    $router->get('/api/v1/me', [ApiController::class, 'me']);
+    $router->put('/api/v1/me', [ApiController::class, 'updateMe']);
+    $router->get('/api/v1/me/export', [ApiController::class, 'exportMe']);
+    $router->delete('/api/v1/me', [ApiController::class, 'deleteMe']);
+    $router->get('/api/v1/specialties', [ApiController::class, 'specialties']);
+    $router->get('/api/v1/practices', [ApiController::class, 'practices']);
+    $router->get('/api/v1/practices/{id}', [ApiController::class, 'practice']);
+    $router->get('/api/v1/watches', [ApiController::class, 'watches']);
+    $router->post('/api/v1/watches', [ApiController::class, 'createWatch']);
+    $router->get('/api/v1/slots', [ApiController::class, 'slots']);
 };

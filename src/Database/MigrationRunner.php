@@ -33,7 +33,7 @@ final class MigrationRunner
     public function fresh(): int
     {
         foreach ([
-            'source_locks', 'provider_logs', 'notifications', 'watch_matches', 'watches', 'users', 'appointment_slots',
+            'source_locks', 'provider_logs', 'notifications', 'watch_matches', 'watches', 'api_tokens', 'users', 'appointment_slots',
             'appointment_sources', 'appointment_types', 'doctor_specialty', 'practice_specialty', 'doctors', 'practices', 'cities',
             'federal_states', 'medical_specialties', 'migrations',
         ] as $table) {
@@ -45,7 +45,7 @@ final class MigrationRunner
     private function ensureMigrationsTable(): void
     {
         $auto = $this->driver() === 'mysql' ? 'BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
-        $string = $this->driver() === 'mysql' ? 'VARCHAR(255)' : 'TEXT';
+        $string = $this->driver() === 'mysql' ? 'VARCHAR(191)' : 'TEXT';
         $datetime = $this->driver() === 'mysql' ? 'DATETIME NOT NULL' : 'TEXT NOT NULL';
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS migrations (id {$auto}, migration {$string} NOT NULL UNIQUE, ran_at {$datetime})");
     }

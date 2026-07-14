@@ -2,22 +2,31 @@
 
 declare(strict_types=1);
 
-return static function (PDO $pdo): void {
+return static function (PDO $pdo, string $driver): void {
     $indexes = [
-        'CREATE INDEX IF NOT EXISTS idx_practices_city ON practices(city)',
-        'CREATE INDEX IF NOT EXISTS idx_practices_postal_code ON practices(postal_code)',
-        'CREATE INDEX IF NOT EXISTS idx_practices_source_external_id ON practices(source_external_id)',
-        'CREATE INDEX IF NOT EXISTS idx_sources_provider ON appointment_sources(provider)',
-        'CREATE INDEX IF NOT EXISTS idx_sources_enabled_interval ON appointment_sources(enabled, check_interval_minutes)',
-        'CREATE INDEX IF NOT EXISTS idx_slots_starts_at ON appointment_slots(starts_at)',
-        'CREATE INDEX IF NOT EXISTS idx_slots_last_seen_at ON appointment_slots(last_seen_at)',
-        'CREATE INDEX IF NOT EXISTS idx_watches_user_id ON watches(user_id)',
-        'CREATE INDEX IF NOT EXISTS idx_watches_active ON watches(active)',
-        'CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)',
-        'CREATE INDEX IF NOT EXISTS idx_provider_logs_source ON provider_logs(appointment_source_id)',
+        ['idx_practices_city', 'practices', 'city'],
+        ['idx_practices_postal_code', 'practices', 'postal_code'],
+        ['idx_practices_source_external_id', 'practices', 'source_external_id'],
+        ['idx_sources_provider', 'appointment_sources', 'provider'],
+        ['idx_sources_enabled_interval', 'appointment_sources', 'enabled, check_interval_minutes'],
+        ['idx_slots_starts_at', 'appointment_slots', 'starts_at'],
+        ['idx_slots_last_seen_at', 'appointment_slots', 'last_seen_at'],
+        ['idx_watches_user_id', 'watches', 'user_id'],
+        ['idx_watches_active', 'watches', 'active'],
+        ['idx_notifications_user_id', 'notifications', 'user_id'],
+        ['idx_provider_logs_source', 'provider_logs', 'appointment_source_id'],
     ];
 
-    foreach ($indexes as $sql) {
-        $pdo->exec($sql);
+    foreach ($indexes as [$name, $table, $columns]) {
+        if ($driver === 'mysql') {
+            $stmt = $pdo->prepare('SHOW INDEX FROM ' . $table . ' WHERE Key_name = :name');
+            $stmt->execute(['name' => $name]);
+            if (!$stmt->fetch()) {
+                $pdo->exec("CREATE INDEX {$name} ON {$table}({$columns})");
+            }
+            continue;
+        }
+
+        $pdo->exec("CREATE INDEX IF NOT EXISTS {$name} ON {$table}({$columns})");
     }
 };

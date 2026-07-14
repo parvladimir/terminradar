@@ -8,7 +8,16 @@ return static function (PDO $pdo): void {
     $name = env('ADMIN_NAME', 'TerminRadar Admin');
     $exists = $pdo->prepare('SELECT id FROM users WHERE email = :email');
     $exists->execute(['email' => mb_strtolower($email)]);
-    if ($exists->fetchColumn()) {
+    $existingId = $exists->fetchColumn();
+    if ($existingId) {
+        $stmt = $pdo->prepare('UPDATE users SET name = :name, password_hash = :password_hash, role = :role, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([
+            'id' => $existingId,
+            'name' => $name,
+            'password_hash' => password_hash((string) $password, PASSWORD_DEFAULT),
+            'role' => 'admin',
+            'updated_at' => date('c'),
+        ]);
         return;
     }
 

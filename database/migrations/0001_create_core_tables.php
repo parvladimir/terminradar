@@ -7,7 +7,7 @@ return static function (PDO $pdo, string $driver): void {
     $json = $driver === 'mysql' ? 'JSON' : 'TEXT';
     $bool = $driver === 'mysql' ? 'TINYINT(1)' : 'INTEGER';
     $text = $driver === 'mysql' ? 'TEXT' : 'TEXT';
-    $string = $driver === 'mysql' ? 'VARCHAR(255)' : 'TEXT';
+    $string = $driver === 'mysql' ? 'VARCHAR(191)' : 'TEXT';
     $datetime = $driver === 'mysql' ? 'DATETIME NULL' : 'TEXT NULL';
     $notNullDate = $driver === 'mysql' ? 'DATETIME NOT NULL' : 'TEXT NOT NULL';
 

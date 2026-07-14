@@ -37,3 +37,15 @@ DocumentRoot "C:/wamp64/www/terminradar/public"
 ```
 
 The repository root also contains a fallback `index.php` and `.htaccess` so a local host that temporarily points to the project root does not expose the source tree.
+
+## Local database
+
+For WAMP/phpMyAdmin, use MySQL:
+
+```powershell
+& 'C:\wamp64\bin\mysql\mysql9.1.0\bin\mysql.exe' -uroot -e "CREATE DATABASE IF NOT EXISTS terminradar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+& 'C:\wamp64\bin\php\php8.4.0\php.exe' bin/console migrate
+& 'C:\wamp64\bin\php\php8.4.0\php.exe' bin/console db:seed
+```
+
+The database will appear in phpMyAdmin as `terminradar`.

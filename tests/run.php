@@ -86,4 +86,11 @@ ok($notifications >= 1, 'watch matching creates notification records');
 $matchedAgain = (new TerminRadar\Services\WatchMatchingService($pdo))->matchSource($sourceId);
 ok($matchedAgain === 0, 'watch matching does not duplicate existing matches');
 
+$tokenRepo = new TerminRadar\Repositories\ApiTokenRepository($pdo);
+$token = $tokenRepo->create((int) $user['id'], 'test');
+ok(strlen($token) === 64, 'api token repository creates plain token once');
+ok($tokenRepo->userForToken($token)['email'] === 'test@example.de', 'api token authenticates user');
+$tokenRepo->revoke($token);
+ok($tokenRepo->userForToken($token) === null, 'api token revoke works');
+
 echo "All tests passed.\n";

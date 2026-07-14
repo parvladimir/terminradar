@@ -25,6 +25,18 @@ final class Router
         $this->routes['POST'][$path] = $handler;
     }
 
+    /** @param array{0: class-string, 1: string} $handler */
+    public function put(string $path, array $handler): void
+    {
+        $this->routes['PUT'][$path] = $handler;
+    }
+
+    /** @param array{0: class-string, 1: string} $handler */
+    public function delete(string $path, array $handler): void
+    {
+        $this->routes['DELETE'][$path] = $handler;
+    }
+
     public function dispatch(Request $request): Response
     {
         $handler = $this->routes[$request->method][$request->path] ?? null;
