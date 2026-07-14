@@ -27,9 +27,15 @@
                 <strong>Telegram</strong>
                 <span class="<?= !empty($user['telegram_chat_id']) ? 'status active' : 'status paused' ?>"><?= $e(!empty($user['telegram_chat_id']) ? $t('notifications.connected') : $t('notifications.not_connected')) ?></span>
                 <?php if (!empty($user['telegram_link_code'])): ?><p class="muted-text"><?= $e($t('notifications.code')) ?>: <strong><?= $e($user['telegram_link_code']) ?></strong></p><?php endif; ?>
+                <p class="muted-text"><?= $e($t('notifications.telegram_help')) ?></p>
                 <form method="post" action="/telegram/link-code">
                     <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">
                     <button class="button tiny secondary" type="submit"><?= $e($t('notifications.get_code')) ?></button>
+                </form>
+                <form method="post" action="/telegram/confirm-local" class="inline-confirm">
+                    <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">
+                    <input name="code" placeholder="<?= $e($t('notifications.code')) ?>">
+                    <button class="button tiny secondary" type="submit"><?= $e($t('notifications.confirm_local')) ?></button>
                 </form>
                 <form method="post" action="/notifications/test/telegram">
                     <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">

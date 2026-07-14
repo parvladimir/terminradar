@@ -25,12 +25,30 @@
             <h2><?= $e($t('catalog.contact')) ?></h2>
             <p><?= $e(trim(($practice['street'] ?? '') . ' ' . ($practice['house_number'] ?? ''))) ?></p>
             <p><?= $e(trim(($practice['postal_code'] ?? '') . ' ' . ($practice['city'] ?? ''))) ?></p>
-            <p><?= $e($practice['phone'] ?? '') ?></p>
+            <?php if (!empty($practice['phone'])): ?><p><?= $e($t('catalog.phone')) ?>: <?= $e($practice['phone']) ?></p><?php endif; ?>
+            <?php if (!empty($practice['email'])): ?><p><?= $e($t('catalog.email')) ?>: <a href="mailto:<?= $e($practice['email']) ?>"><?= $e($practice['email']) ?></a></p><?php endif; ?>
+            <?php if ((int) ($practice['wheelchair_accessible'] ?? 0) === 1): ?><p><?= $e($t('catalog.accessible')) ?></p><?php endif; ?>
         </section>
         <section>
             <h2><?= $e($t('catalog.sources')) ?></h2>
             <?php foreach ($practice['sources'] as $source): ?>
-                <p><strong><?= $e($source['provider']) ?></strong> · <?= $e($source['enabled'] ? 'enabled' : 'disabled') ?> · <?= $e($source['check_interval_minutes']) ?> min</p>
+                <article class="source-card">
+                    <div class="source-head">
+                        <strong><?= $e($source['provider']) ?></strong>
+                        <span class="<?= $source['enabled'] ? 'status active' : 'status paused' ?>"><?= $e($source['enabled'] ? $t('catalog.source_enabled') : $t('catalog.source_disabled')) ?></span>
+                    </div>
+                    <p><a href="<?= $e($source['source_url']) ?>" target="_blank" rel="noopener"><?= $e($source['source_url']) ?></a></p>
+                    <p><?= $e($t('catalog.check_interval')) ?>: <?= $e($source['check_interval_minutes']) ?> min</p>
+                    <p><?= $e($t('catalog.last_success')) ?>: <?= $e($source['last_success_at'] ?: '-') ?></p>
+                    <p><?= $e($t('catalog.last_error')) ?>: <?= $e($source['last_error_message'] ?: '-') ?></p>
+                    <p><?= $e($t('catalog.saved_slots')) ?>: <?= $e($source['slot_count'] ?? 0) ?></p>
+                    <?php if (($currentUser['role'] ?? 'user') === 'admin'): ?>
+                        <form method="post" action="/admin/sources/<?= $e($source['id']) ?>/check">
+                            <input type="hidden" name="_token" value="<?= $e($csrf()) ?>">
+                            <button class="button tiny" type="submit"><?= $e($t('catalog.check_now')) ?></button>
+                        </form>
+                    <?php endif; ?>
+                </article>
             <?php endforeach; ?>
         </section>
         <section>

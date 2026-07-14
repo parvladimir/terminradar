@@ -9,6 +9,7 @@ use TerminRadar\Controllers\LocaleController;
 use TerminRadar\Controllers\NotificationController;
 use TerminRadar\Controllers\PracticeController;
 use TerminRadar\Controllers\SlotController;
+use TerminRadar\Controllers\SourceController;
 use TerminRadar\Controllers\WatchController;
 
 return static function (TerminRadar\Core\Router $router): void {
@@ -38,7 +39,9 @@ return static function (TerminRadar\Core\Router $router): void {
     $router->post('/watches/{id}/delete', [WatchController::class, 'delete']);
     $router->post('/notifications/test/{channel}', [NotificationController::class, 'test']);
     $router->post('/telegram/link-code', [NotificationController::class, 'telegramCode']);
+    $router->post('/telegram/confirm-local', [NotificationController::class, 'confirmTelegramLocal']);
     $router->post('/push/enable-local', [NotificationController::class, 'enableWebPush']);
+    $router->post('/admin/sources/{id}/check', [SourceController::class, 'check']);
     $router->get('/api/v1/watches', [WatchController::class, 'apiIndex']);
 
     $router->get('/admin', [AdminController::class, 'dashboard']);

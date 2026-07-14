@@ -87,7 +87,16 @@ final class PracticeRepository
         $stmt->execute(['practice_id' => $id]);
         $practice['specialties_list'] = $stmt->fetchAll();
 
-        $stmt = $this->pdo->prepare('SELECT * FROM appointment_sources WHERE practice_id = :practice_id ORDER BY provider, id');
+        $stmt = $this->pdo->prepare("SELECT src.*,
+            COUNT(DISTINCT s.id) AS slot_count,
+            MAX(CASE WHEN s.status = 'available' THEN s.starts_at ELSE NULL END) AS latest_slot_at,
+            MAX(log.created_at) AS last_log_at
+            FROM appointment_sources src
+            LEFT JOIN appointment_slots s ON s.appointment_source_id = src.id
+            LEFT JOIN provider_logs log ON log.appointment_source_id = src.id
+            WHERE src.practice_id = :practice_id
+            GROUP BY src.id
+            ORDER BY src.provider, src.id");
         $stmt->execute(['practice_id' => $id]);
         $practice['sources'] = $stmt->fetchAll();
 

@@ -190,6 +190,30 @@ textarea {
     gap: .65rem;
     align-content: start;
 }
+.source-card {
+    display: grid;
+    gap: .45rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: .85rem;
+    margin-bottom: .75rem;
+}
+.source-card p {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.source-head {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+    justify-content: space-between;
+}
+.inline-confirm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .5rem;
+}
 .event-row {
     display: flex;
     justify-content: space-between;

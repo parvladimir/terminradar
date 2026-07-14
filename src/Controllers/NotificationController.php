@@ -72,6 +72,35 @@ final class NotificationController extends Controller
         return Response::redirect('/dashboard');
     }
 
+    public function confirmTelegramLocal(Request $request): Response
+    {
+        $user = $this->currentUser();
+        if ($user === null) {
+            return Response::redirect('/login');
+        }
+        if (!Csrf::validate($this->app->session, $request->input('_token'))) {
+            $this->app->session->flash('error', 'Invalid CSRF token.');
+            return Response::redirect('/dashboard');
+        }
+
+        $code = strtoupper(trim((string) $request->input('code', '')));
+        if ($code === '' || $code !== (string) ($user['telegram_link_code'] ?? '') || strtotime((string) ($user['telegram_link_expires_at'] ?? '')) < time()) {
+            $this->app->session->flash('error', 'Telegram code is invalid or expired.');
+            return Response::redirect('/dashboard');
+        }
+
+        $stmt = $this->app->database->pdo()->prepare('UPDATE users SET telegram_chat_id = :chat_id, telegram_verified_at = :verified_at, telegram_link_code = NULL, telegram_link_expires_at = NULL, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([
+            'id' => $user['id'],
+            'chat_id' => 'local-test-' . $user['id'],
+            'verified_at' => date('c'),
+            'updated_at' => date('c'),
+        ]);
+
+        $this->app->session->flash('success', 'Telegram connected locally.');
+        return Response::redirect('/dashboard');
+    }
+
     public function enableWebPush(Request $request): Response
     {
         $user = $this->currentUser();

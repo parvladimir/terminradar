@@ -30,6 +30,9 @@ ok(password_verify(env('ADMIN_PASSWORD', 'ChangeMeImmediately123!'), $admin['pas
 
 $source = $pdo->query("SELECT * FROM appointment_sources WHERE provider = 'docvisit' LIMIT 1")->fetch();
 ok((bool) $source, 'DocVisit appointment source is seeded');
+ok((int) $source['enabled'] === 1, 'seeded DocVisit source is enabled');
+$seededPractice = $pdo->query("SELECT * FROM practices WHERE slug = 'urologische-praxis-marl' LIMIT 1")->fetch();
+ok((bool) $seededPractice && $seededPractice['phone'] === '02365/34633' && $seededPractice['street'] === 'Lipper Weg', 'seeded Praxis has verified contact details');
 
 $repo = new TerminRadar\Repositories\SpecialtyRepository($pdo);
 ok($repo->active('uk')[0]['name'] !== '', 'localized specialty repository works');
