@@ -50,9 +50,39 @@ abstract class AbstractHtmlProviderAdapter implements AppointmentProviderInterfa
     /** @return list<array<string, mixed>> */
     protected function parseSlots(string $html, array $source): array
     {
+        $slots = [];
+        $bookingUrl = (string) ($source['booking_url'] ?? $source['source_url']);
+
+        $daySource = html_entity_decode((string) preg_replace('/<[^>]+>/u', ' ', $html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $daySource = preg_replace('/\s+/u', ' ', $daySource) ?? $daySource;
+
+        preg_match_all('/(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*(\d{1,2})\.(\d{1,2})\.(\d{4})(.*?)(?=(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*\d{1,2}\.\d{1,2}\.\d{4}|$)/su', $daySource, $dayBlocks, PREG_SET_ORDER);
+        foreach ($dayBlocks as $block) {
+            $weekday = $block[1];
+            $date = sprintf('%04d-%02d-%02d', (int) $block[4], (int) $block[3], (int) $block[2]);
+            preg_match_all('/(?<!\d)(\d{1,2})[:.](\d{2})(?!\d)/u', $block[5], $timeMatches, PREG_SET_ORDER);
+            foreach ($timeMatches as $timeMatch) {
+                $startsAt = DateTimeImmutable::createFromFormat('!Y-m-d H:i', sprintf('%s %02d:%02d', $date, (int) $timeMatch[1], (int) $timeMatch[2]));
+                if (!$startsAt) {
+                    continue;
+                }
+                $slots[] = [
+                    'starts_at' => $startsAt->format('Y-m-d H:i:s'),
+                    'ends_at' => null,
+                    'booking_url' => $bookingUrl,
+                    'external_slot_id' => hash('sha256', $startsAt->format('c') . '|' . ($source['id'] ?? 'source')),
+                    'source_label' => 'DocVisit ' . $weekday . ' ' . $startsAt->format('Y-m-d H:i'),
+                    'source_url' => (string) ($source['source_url'] ?? ''),
+                ];
+            }
+        }
+
+        if ($slots !== []) {
+            return $this->uniqueSlots($slots);
+        }
+
         $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
-        $slots = [];
 
         preg_match_all('/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4}).{0,80}?(\d{1,2})[:.](\d{2})/u', $text, $matches, PREG_SET_ORDER);
         foreach ($matches as $match) {
@@ -65,12 +95,30 @@ abstract class AbstractHtmlProviderAdapter implements AppointmentProviderInterfa
             $raw = [
                 'starts_at' => $startsAt->format('Y-m-d H:i:s'),
                 'ends_at' => null,
-                'booking_url' => (string) ($source['booking_url'] ?? $source['source_url']),
+                'booking_url' => $bookingUrl,
                 'external_slot_id' => hash('sha256', $startsAt->format('c') . '|' . ($source['id'] ?? 'source')),
+                'source_label' => 'HTML ' . $startsAt->format('Y-m-d H:i'),
+                'source_url' => (string) ($source['source_url'] ?? ''),
             ];
             $slots[] = $raw;
         }
 
-        return $slots;
+        return $this->uniqueSlots($slots);
+    }
+
+    /** @param list<array<string, mixed>> $slots @return list<array<string, mixed>> */
+    private function uniqueSlots(array $slots): array
+    {
+        $seen = [];
+        $unique = [];
+        foreach ($slots as $slot) {
+            $key = (string) $slot['starts_at'];
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $unique[] = $slot;
+        }
+        return $unique;
     }
 }

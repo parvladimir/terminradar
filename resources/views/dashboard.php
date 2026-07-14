@@ -66,6 +66,7 @@
                     <div>
                         <h2><?= $e($watch['name']) ?></h2>
                         <p><?= $e($watch['practice_name'] ?? $watch['city'] ?? '') ?> · <?= $e($watch['earliest_date'] ?? '') ?> – <?= $e($watch['latest_date'] ?? '') ?> · <?= $e($watch['time_from'] ?? '') ?> <?= $watch['time_to'] ? '– ' . $e($watch['time_to']) : '' ?></p>
+                        <?php if (!empty($watch['current_best_slot_at'])): ?><p class="muted-text">Лучший найденный термин: <?= $e($watch['current_best_slot_at']) ?></p><?php endif; ?>
                         <span class="<?= $watch['active'] ? 'status active' : 'status paused' ?>"><?= $e($watch['active'] ? $t('watch.active') : $t('watch.paused')) ?></span>
                     </div>
                     <div class="card-actions">

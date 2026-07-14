@@ -13,7 +13,9 @@ final class AppointmentSlotDTO
         public readonly ?string $externalSlotId,
         public readonly ?string $doctorName,
         public readonly ?string $appointmentTypeName,
-        public readonly string $rawHash
+        public readonly string $rawHash,
+        public readonly ?string $sourceLabel = null,
+        public readonly ?array $rawPayload = null
     ) {
     }
 }

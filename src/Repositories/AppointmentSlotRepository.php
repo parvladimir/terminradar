@@ -26,7 +26,7 @@ final class AppointmentSlotRepository
             $existing = $this->findExisting($sourceId, $slot);
 
             if ($existing === null) {
-                $stmt = $this->pdo->prepare('INSERT INTO appointment_slots (appointment_source_id, starts_at, ends_at, booking_url, external_slot_id, first_seen_at, last_seen_at, status, raw_hash, absent_confirmations, created_at, updated_at) VALUES (:source_id, :starts_at, :ends_at, :booking_url, :external_slot_id, :first_seen_at, :last_seen_at, :status, :raw_hash, 0, :created_at, :updated_at)');
+                $stmt = $this->pdo->prepare('INSERT INTO appointment_slots (appointment_source_id, starts_at, ends_at, booking_url, external_slot_id, first_seen_at, last_seen_at, status, raw_hash, absent_confirmations, source_label, raw_payload, created_at, updated_at) VALUES (:source_id, :starts_at, :ends_at, :booking_url, :external_slot_id, :first_seen_at, :last_seen_at, :status, :raw_hash, 0, :source_label, :raw_payload, :created_at, :updated_at)');
                 $stmt->execute([
                     'source_id' => $sourceId,
                     'starts_at' => $slot->startsAt,
@@ -37,6 +37,8 @@ final class AppointmentSlotRepository
                     'last_seen_at' => $now,
                     'status' => 'available',
                     'raw_hash' => $slot->rawHash,
+                    'source_label' => $slot->sourceLabel,
+                    'raw_payload' => $slot->rawPayload !== null ? json_encode($slot->rawPayload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : null,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
@@ -44,8 +46,14 @@ final class AppointmentSlotRepository
                 continue;
             }
 
-            $stmt = $this->pdo->prepare("UPDATE appointment_slots SET last_seen_at = :now, status = 'available', disappeared_at = NULL, absent_confirmations = 0, booking_url = :booking_url, updated_at = :now WHERE id = :id");
-            $stmt->execute(['id' => $existing['id'], 'booking_url' => $slot->bookingUrl, 'now' => $now]);
+            $stmt = $this->pdo->prepare("UPDATE appointment_slots SET last_seen_at = :now, status = 'available', disappeared_at = NULL, absent_confirmations = 0, booking_url = :booking_url, source_label = :source_label, raw_payload = :raw_payload, updated_at = :now WHERE id = :id");
+            $stmt->execute([
+                'id' => $existing['id'],
+                'booking_url' => $slot->bookingUrl,
+                'source_label' => $slot->sourceLabel,
+                'raw_payload' => $slot->rawPayload !== null ? json_encode($slot->rawPayload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : null,
+                'now' => $now,
+            ]);
             $updated++;
         }
 

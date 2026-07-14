@@ -17,7 +17,7 @@ final class WatchMatchingService
 
     public function matchSource(int $sourceId): int
     {
-        $stmt = $this->pdo->prepare("SELECT s.*, p.id AS practice_id, p.name AS practice_name, p.city, p.postal_code, p.insurance_types FROM appointment_slots s INNER JOIN appointment_sources src ON src.id = s.appointment_source_id INNER JOIN practices p ON p.id = src.practice_id WHERE s.appointment_source_id = :source_id AND s.status = 'available'");
+        $stmt = $this->pdo->prepare("SELECT s.*, p.id AS practice_id, p.name AS practice_name, p.city, p.postal_code, p.insurance_types FROM appointment_slots s INNER JOIN appointment_sources src ON src.id = s.appointment_source_id INNER JOIN practices p ON p.id = src.practice_id WHERE s.appointment_source_id = :source_id AND s.status = 'available' ORDER BY s.starts_at ASC");
         $stmt->execute(['source_id' => $sourceId]);
         $matches = 0;
 
@@ -83,6 +83,12 @@ final class WatchMatchingService
         $stmt = $this->pdo->prepare("INSERT INTO watch_matches (watch_id, appointment_slot_id, matched_at, status, created_at, updated_at) VALUES (:watch_id, :slot_id, :matched_at, 'new', :created_at, :updated_at)");
         $stmt->execute(['watch_id' => $watch['id'], 'slot_id' => $slot['id'], 'matched_at' => $now, 'created_at' => $now, 'updated_at' => $now]);
 
+        if (!$this->isEarlierThanCurrentBest($slot, $watch)) {
+            return true;
+        }
+
+        $this->updateCurrentBest((int) $watch['id'], (string) $slot['starts_at']);
+
         $channels = ['in_app'];
         if ((int) $watch['notification_email'] === 1) {
             $channels[] = 'email';
@@ -95,10 +101,26 @@ final class WatchMatchingService
         }
         $notifications = new NotificationRepository($this->pdo);
         foreach ($channels as $channel) {
-            $body = sprintf('Praxis: %s. Termin: %s. Buchung: /slots/%d/book', $slot['practice_name'], $slot['starts_at'], $slot['id']);
-            $notifications->create((int) $watch['user_id'], (int) $watch['id'], (int) $slot['id'], $channel, 'TerminRadar: neuer passender Termin', $body);
+            $body = sprintf('Frueherer Termin gefunden. Praxis: %s. Termin: %s. Buchung: /slots/%d/book', $slot['practice_name'], $slot['starts_at'], $slot['id']);
+            $notifications->create((int) $watch['user_id'], (int) $watch['id'], (int) $slot['id'], $channel, 'TerminRadar: frueherer Termin gefunden', $body);
         }
 
         return true;
+    }
+
+    /** @param array<string, mixed> $slot @param array<string, mixed> $watch */
+    private function isEarlierThanCurrentBest(array $slot, array $watch): bool
+    {
+        if (empty($watch['current_best_slot_at'])) {
+            return true;
+        }
+
+        return strtotime((string) $slot['starts_at']) < strtotime((string) $watch['current_best_slot_at']);
+    }
+
+    private function updateCurrentBest(int $watchId, string $startsAt): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE watches SET current_best_slot_at = :starts_at, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute(['id' => $watchId, 'starts_at' => $startsAt, 'updated_at' => date('c')]);
     }
 }

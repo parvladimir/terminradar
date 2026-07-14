@@ -10,6 +10,7 @@ use TerminRadar\Database\SeederRunner;
 use TerminRadar\Providers\ProviderRegistry;
 use TerminRadar\Repositories\AppointmentSourceRepository;
 use TerminRadar\Services\AppointmentCheckService;
+use TerminRadar\Services\TelegramService;
 
 final class Application
 {
@@ -52,6 +53,8 @@ final class Application
             'appointments:discover-types' => $this->discoverTypes((int) ($argv[2] ?? 0)),
             'appointments:test-notifications' => $this->line('Usage accepted: appointments:test-notifications {userId}. Notification transports follow in stage 4.'),
             'appointments:cleanup' => $this->line('Cleanup command ready; retention policy follows in stage 3.'),
+            'telegram:poll' => $this->telegramPoll(),
+            'notifications:send' => $this->sendNotifications(),
             default => $this->help(),
         };
 
@@ -72,7 +75,7 @@ final class Application
     private function help(): int
     {
         echo "TerminRadar console\n";
-        echo "Commands: migrate, migrate:fresh, db:seed, schedule:run, appointments:check, appointments:check-source, appointments:discover-types, appointments:test-notifications, appointments:cleanup\n";
+        echo "Commands: migrate, migrate:fresh, db:seed, schedule:run, appointments:check, appointments:check-source, appointments:discover-types, appointments:test-notifications, appointments:cleanup, telegram:poll, notifications:send\n";
         return 0;
     }
 
@@ -110,6 +113,18 @@ final class Application
 
         $adapter = (new ProviderRegistry())->forSource($source);
         echo json_encode(['data' => $adapter->fetchAppointmentTypes($source)], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        return 0;
+    }
+
+    private function telegramPoll(): int
+    {
+        echo json_encode((new TelegramService($this->database->pdo()))->processUpdates(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        return 0;
+    }
+
+    private function sendNotifications(): int
+    {
+        echo json_encode(['telegram' => (new TelegramService($this->database->pdo()))->sendPending()], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) . PHP_EOL;
         return 0;
     }
 }

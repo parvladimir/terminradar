@@ -346,6 +346,24 @@ textarea {
 .slot-summary dd {
     margin: 0;
     font-weight: 800;
+    overflow-wrap: anywhere;
+}
+.raw-details {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--soft);
+    padding: .85rem;
+    margin: 1rem 0;
+}
+.raw-details summary {
+    cursor: pointer;
+    font-weight: 800;
+}
+.raw-details pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: .75rem 0 0;
+    font-size: .9rem;
 }
 .slot-row {
     display: flex;

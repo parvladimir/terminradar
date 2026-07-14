@@ -20,7 +20,9 @@ final class DocVisitProviderAdapter extends AbstractHtmlProviderAdapter
             $rawSlot['external_slot_id'] ?? null,
             $rawSlot['doctor_name'] ?? null,
             $rawSlot['appointment_type_name'] ?? null,
-            hash('sha256', json_encode($rawSlot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE))
+            hash('sha256', json_encode($rawSlot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)),
+            $rawSlot['source_label'] ?? null,
+            $rawSlot
         );
     }
 }

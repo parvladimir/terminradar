@@ -53,16 +53,17 @@ $rawSlots = $adapter->fetchAvailableSlots([
     'booking_url' => 'https://example.invalid/book',
     'fixture_html' => $fixture,
 ]);
-ok(count($rawSlots) === 2, 'DocVisit adapter parses fixture slots');
+ok(count($rawSlots) === 9, 'DocVisit adapter parses all fixture day/time slots');
+ok($rawSlots[0]['starts_at'] === '2026-09-04 08:15:00', 'DocVisit adapter keeps the earliest visible slot');
 $normalizedSlots = array_map(static fn (array $raw) => $adapter->normalizeSlot($raw), $rawSlots);
 $slotRepo = new TerminRadar\Repositories\AppointmentSlotRepository($pdo);
 $sourceId = (int) $pdo->query("SELECT id FROM appointment_sources WHERE provider = 'docvisit' LIMIT 1")->fetchColumn();
 $sync = $slotRepo->sync($sourceId, $normalizedSlots);
-ok($sync['new'] === 2, 'slot sync stores new slots');
+ok($sync['new'] === 9, 'slot sync stores new slots');
 $sync = $slotRepo->sync($sourceId, []);
 ok($sync['disappeared'] === 0, 'first empty response does not mark slots disappeared');
 $sync = $slotRepo->sync($sourceId, []);
-ok($sync['disappeared'] === 2, 'second confirmed empty response marks disappeared slots');
+ok($sync['disappeared'] === 9, 'second confirmed empty response marks disappeared slots');
 
 $auth = new TerminRadar\Services\AuthService(new TerminRadar\Repositories\UserRepository($pdo));
 $user = $auth->register(['name' => 'Test User', 'email' => 'test@example.de', 'password' => 'VerySecret123!'], 'uk');
@@ -85,7 +86,9 @@ ok($watchId > 0, 'watch repository creates watch');
 $matched = (new TerminRadar\Services\WatchMatchingService($pdo))->matchSource($sourceId);
 ok($matched >= 1, 'watch matching creates matches');
 $notifications = (int) $pdo->query('SELECT COUNT(*) FROM notifications')->fetchColumn();
-ok($notifications >= 1, 'watch matching creates notification records');
+ok($notifications === 2, 'watch matching notifies only the current earliest slot channels');
+$bestSlot = $pdo->query('SELECT current_best_slot_at FROM watches WHERE id = ' . (int) $watchId)->fetchColumn();
+ok($bestSlot === '2026-09-04 08:15:00', 'watch stores current best earlier slot');
 $matchedAgain = (new TerminRadar\Services\WatchMatchingService($pdo))->matchSource($sourceId);
 ok($matchedAgain === 0, 'watch matching does not duplicate existing matches');
 

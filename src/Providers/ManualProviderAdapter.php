@@ -23,7 +23,7 @@ final class ManualProviderAdapter implements AppointmentProviderInterface
 
     public function normalizeSlot(array $rawSlot): AppointmentSlotDTO
     {
-        return new AppointmentSlotDTO((string) $rawSlot['starts_at'], $rawSlot['ends_at'] ?? null, (string) $rawSlot['booking_url'], $rawSlot['external_slot_id'] ?? null, null, null, hash('sha256', json_encode($rawSlot, JSON_THROW_ON_ERROR)));
+        return new AppointmentSlotDTO((string) $rawSlot['starts_at'], $rawSlot['ends_at'] ?? null, (string) $rawSlot['booking_url'], $rawSlot['external_slot_id'] ?? null, null, null, hash('sha256', json_encode($rawSlot, JSON_THROW_ON_ERROR)), $rawSlot['source_label'] ?? null, $rawSlot);
     }
 
     public function validateSource(array $source): ProviderValidationResult
